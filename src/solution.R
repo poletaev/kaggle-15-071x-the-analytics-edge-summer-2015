@@ -63,6 +63,9 @@ prodline <- factor(prodline,
 data$productline <- prodline
 rm(prodline)
 
+# add new variable (empty description)
+data$emptydescription <- factor(data$description == "")
+
 ## split data back into train and test
 train <- subset(data, data$train == 1)
 #train <- train[-c(718, 1057, 1088, 1148, 1797),]
@@ -82,7 +85,8 @@ logRegModel.full <- glm(sold ~ biddable + startprice + condition +cellular +
                         family=binomial(),
                         data=newTrain)
 
-logRegModel <- glm(sold ~ biddable + startprice + condition + storage + productline,
+logRegModel <- glm(sold ~ biddable + startprice + condition + storage + 
+                     productline + emptydescription,
                     family=binomial(),
                      data=newTrain)
 plot(logRegModel)
