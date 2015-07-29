@@ -65,7 +65,8 @@ rm(prodline)
 
 ## split data back into train and test
 train <- subset(data, data$train == 1)
-train <- train[-c(718, 1057, 1088, 1148, 1797),]
+#train <- train[-c(718, 1057, 1088, 1148, 1797),]
+train <- train[-c(1057),]
 test <- subset(data, data$train == 0)
 test$sold <- NULL
 
@@ -76,30 +77,44 @@ cvTrain <- subset(train, spl == TRUE)
 newTrain <- subset(train, spl == FALSE)
 
 # build logistic regression model
-logRegModel.sub <- glm(sold ~ biddable + startprice + condition + storage + productline, family=binomial(), data=newTrain)
-# build logistic regression model on entire train data set
-logRegModel.full.0 <- glm(sold ~ biddable + startprice + condition + storage + productline,
+logRegModel.full <- glm(sold ~ biddable + startprice + condition +cellular +
+                          + carrier + color + storage + productline,
                         family=binomial(),
-                        data=train)
-logRegModel.full <- glm(sold ~ biddable + startprice + (condition + storage + productline)^2,
-                        family=binomial(),
-                        data=train)
-plot(logRegModel.full)
+                        data=newTrain)
 
-table(train$sold, predict(logRegModel.full, type="response") > 0.5)
+logRegModel <- glm(sold ~ biddable + startprice + condition + storage + productline,
+                    family=binomial(),
+                     data=newTrain)
+plot(logRegModel)
+
+# compute accuracy on train data:
+trainTable <- table(train$sold,
+                    predict(logRegModel, type="response", newdata = train) > 0.5)
+print((trainTable[1, 1] + trainTable[2, 2]) / nrow(train))
+
+# accuracy of cross-validation data:
+cvTrainTable <- table(cvTrain$sold,
+                    predict(logRegModel, type="response", newdata = cvTrain) > 0.5)
+# accuracy on train data:
+print((cvTrainTable[1, 1] + cvTrainTable[2, 2]) / nrow(cvTrain))
 
 # plot ROC
 library(ROCR)
-predROCR = prediction(predict(logRegModel.full, type="response"),
+predROCR <- prediction(predict(logRegModel, type="response", newdata=train),
                       train$sold)
-perfROCR = performance(predROCR, "tpr", "fpr")
+perfROCR <- performance(predROCR, "tpr", "fpr")
 plot(perfROCR, colorize=TRUE)
 
 # Compute AUC
-performance(predROCR, "auc")@y.values
+print(performance(predROCR, "auc")@y.values)
+
+# AUC for cross-validated data
+cvROCR <- prediction(predict(logRegModel, type="response", newdata = cvTrain),
+                     cvTrain$sold)
+print(performance(cvROCR, "auc")@y.values)
 
 ## store result of prediction
-test$Probability1 <- predict(logRegModel.full, type="response", newdata=test)
+test$Probability1 <- predict(logRegModel, type="response", newdata=test)
 write.table(test[, c("UniqueID", "Probability1")],
             file="../submissions/logistic-regression-model-2.csv",
             sep=",", row.names=FALSE, col.names = TRUE, quote = FALSE)
