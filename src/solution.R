@@ -16,7 +16,14 @@ data$biddable <- as.factor(data$biddable)
 
 # condition of the product 
 condition <- as.factor(data$condition)
-condition <- factor(condition, levels=c("New", "New other (see details)", "Manufacturer refurbished", "Seller refurbished", "Used", "For parts or not working"))
+condition <- factor(condition,
+                    levels=c("New",
+                             "New other (see details)",
+                             "Manufacturer refurbished",
+                             "Seller refurbished",
+                             "Used",
+                             "For parts or not working"),
+                    ordered=TRUE)
 data$condition <- condition
 rm(condition)
 
@@ -39,7 +46,20 @@ data$sold <- as.factor(data$sold)
 # it might be not accurate
 # sorce of dates is https://en.wikipedia.org/wiki/IPad#iPad_series
 prodline <- as.factor(data$productline)
-prodline <- factor(prodline, levels=c("Unknown", "iPad 1", "iPad 2", "iPad 3", "iPad mini", "iPad 4", "iPad mini 2", "iPad Air", "iPad 5", "iPad mini 3", "iPad Air 2", "iPad mini Retina"))
+prodline <- factor(prodline,
+                   levels=c("Unknown",
+                            "iPad 1",           # April 30, 2010
+                            "iPad 2",           # March 25, 2011
+                            "iPad 3",           # March 23, 2012
+                            "iPad mini",        # November 2, 2012
+                            "iPad 4",           # ?? 
+                            "iPad mini 2",      # November 12, 2013
+                            "iPad Air",         # November 1, 2013
+                            "iPad 5",           # ?? October 24, 2014
+                            "iPad mini Retina", # ??
+                            "iPad mini 3",      # October 24, 2014
+                            "iPad Air 2"),      # October 24, 2014
+                   ordered=TRUE)
 data$productline <- prodline
 rm(prodline)
 
