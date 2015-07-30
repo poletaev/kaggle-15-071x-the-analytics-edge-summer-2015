@@ -85,21 +85,31 @@ logRegModel.full <- glm(sold ~ biddable + startprice + condition +cellular +
                         family=binomial(),
                         data=newTrain)
 
-logRegModel <- glm(sold ~ biddable + startprice + condition + storage + 
+logRegModel.1 <- glm(sold ~ biddable + startprice + condition + storage + 
                      productline + emptydescription,
-                    family=binomial(),
-                     data=newTrain)
+                   family=binomial(),
+                   data=newTrain)
+
+logRegModel <- glm(sold ~ biddable + startprice,
+                   family=binomial(),
+                   data=newTrain)
+
 plot(logRegModel)
+
+# test overdispersion
+print("ratio of residual deviance to the residual degreees of freedom for model: ")
+print(deviance(logRegModel)/df.residual(logRegModel))
 
 # compute accuracy on train data:
 trainTable <- table(train$sold,
                     predict(logRegModel, type="response", newdata = train) > 0.5)
+print("test data accuracy: ")
 print((trainTable[1, 1] + trainTable[2, 2]) / nrow(train))
 
 # accuracy of cross-validation data:
 cvTrainTable <- table(cvTrain$sold,
                     predict(logRegModel, type="response", newdata = cvTrain) > 0.5)
-# accuracy on train data:
+print("cross-validation train data accuracy: ")
 print((cvTrainTable[1, 1] + cvTrainTable[2, 2]) / nrow(cvTrain))
 
 # plot ROC
@@ -110,11 +120,13 @@ perfROCR <- performance(predROCR, "tpr", "fpr")
 plot(perfROCR, colorize=TRUE)
 
 # Compute AUC
+print("test data AUC: ")
 print(performance(predROCR, "auc")@y.values)
 
 # AUC for cross-validated data
 cvROCR <- prediction(predict(logRegModel, type="response", newdata = cvTrain),
                      cvTrain$sold)
+print("cross-validation train data AUC: ")
 print(performance(cvROCR, "auc")@y.values)
 
 ## store result of prediction
