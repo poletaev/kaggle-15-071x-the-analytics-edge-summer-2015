@@ -131,6 +131,6 @@ print(performance(cvROCR, "auc")@y.values)
 
 ## store result of prediction
 test$Probability1 <- predict(logRegModel, type="response", newdata=test)
-write.table(test[, c("UniqueID", "Probability1")],
+write.table(format(test[, c("UniqueID", "Probability1")], digits=9),
             file="../submissions/logistic-regression-model-2.csv",
             sep=",", row.names=FALSE, col.names = TRUE, quote = FALSE)
