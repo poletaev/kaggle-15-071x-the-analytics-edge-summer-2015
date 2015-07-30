@@ -63,6 +63,9 @@ prodline <- factor(prodline,
 data$productline <- prodline
 rm(prodline)
 
+## scale startprice
+data$startprice <- scale(data$startprice)
+
 # add new variable (empty description)
 data$emptydescription <- factor(data$description == "")
 
@@ -76,8 +79,8 @@ test$sold <- NULL
 # split train data into those used for training and for cross-validation
 set.seed(144)
 spl <- sample.split(trainData, 0.8)
-cvTrain <- subset(train, spl == TRUE)
-newTrain <- subset(train, spl == FALSE)
+newTrain <- subset(train, spl == TRUE)
+cvTrain <- subset(train, spl == FALSE)
 
 # build logistic regression model
 logRegModel.full <- glm(sold ~ biddable + startprice + condition +cellular +
@@ -90,7 +93,9 @@ logRegModel.1 <- glm(sold ~ biddable + startprice + condition + storage +
                    family=binomial(),
                    data=newTrain)
 
-logRegModel <- glm(sold ~ biddable + startprice,
+library(robust)
+logRegModel <- glm(sold ~ startprice + biddable + condition + storage + 
+                     productline,
                    family=binomial(),
                    data=newTrain)
 
