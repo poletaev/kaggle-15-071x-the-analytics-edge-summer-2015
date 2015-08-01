@@ -17,18 +17,6 @@ plot(logRegModel)
 print("ratio of residual deviance to the residual degreees of freedom for model: ")
 print(deviance(logRegModel)/df.residual(logRegModel))
 
-# compute accuracy on train data:
-trainTable <- table(train$sold,
-                    predict(logRegModel, type="response", newdata = train) > 0.5)
-print("test data accuracy: ")
-print((trainTable[1, 1] + trainTable[2, 2]) / nrow(train))
-
-# accuracy of cross-validation data:
-cvTrainTable <- table(cvTrain$sold,
-                    predict(logRegModel, type="response", newdata = cvTrain) > 0.5)
-print("cross-validation train data accuracy: ")
-print((cvTrainTable[1, 1] + cvTrainTable[2, 2]) / nrow(cvTrain))
-
 # plot ROC
 library(ROCR)
 predROCR <- prediction(predict(logRegModel, type="response", newdata=train),
@@ -37,15 +25,27 @@ perfROCR <- performance(predROCR, "tpr", "fpr")
 plot(perfROCR, colorize=TRUE, print.cutoffs.at=seq(0,1,0.1),
      text.adj=c(-0.2, 1.7))
 
+# Compute Accuracy
+print("train data Accuracy: ")
+print(mean(performance(predROCR, "acc")@y.values[[1]]))
+
+# Compute Accuracy
+print("train data Sensitivity (true posititive rate): ")
+print(mean(performance(predROCR, "sens")@y.values[[1]]))
+
+# Compute Accuracy
+print("train data Specificity (true negative rate): ")
+print(mean(performance(predROCR, "spec")@y.values[[1]]))
+
 # Compute AUC
 print("train data AUC: ")
-print(performance(predROCR, "auc")@y.values)
+print(performance(predROCR, "auc")@y.values[[1]])
 
 # AUC for cross-validated data
 cvROCR <- prediction(predict(logRegModel, type="response", newdata = cvTrain),
                      cvTrain$sold)
 print("cross-validation train data AUC: ")
-print(performance(cvROCR, "auc")@y.values)
+print(performance(cvROCR, "auc")@y.values[[1]])
 
 ## store result of prediction
 test$Probability1 <- predict(logRegModel, type="response", newdata=test)
