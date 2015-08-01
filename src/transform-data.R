@@ -42,7 +42,7 @@ data$startprice <- scale(data$startprice)
 # add new variable (empty description)
 data$emptydescription <- factor(data$description == "")
 
-data$Description <- NULL
+data$description <- NULL
 
 ## split data back into train and test
 train <- subset(data, data$train == 1)
