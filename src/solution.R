@@ -23,7 +23,7 @@ condition <- factor(condition,
                              "Seller refurbished",
                              "Used",
                              "For parts or not working"),
-                    ordered=TRUE)
+                    ordered=FALSE)
 data$condition <- condition
 rm(condition)
 
@@ -59,7 +59,7 @@ prodline <- factor(prodline,
                             "iPad mini Retina", # ??
                             "iPad mini 3",      # October 24, 2014
                             "iPad Air 2"),      # October 24, 2014
-                   ordered=TRUE)
+                   ordered=FALSE)
 data$productline <- prodline
 rm(prodline)
 
@@ -94,8 +94,8 @@ logRegModel.1 <- glm(sold ~ biddable + startprice + condition + storage +
                    data=newTrain)
 
 library(robust)
-logRegModel <- glm(sold ~ startprice + biddable + condition + storage + 
-                     productline,
+logRegModel <- glm(sold ~ biddable + startprice + condition + cellular +
+                   storage + productline,
                    family=binomial(),
                    data=newTrain)
 
