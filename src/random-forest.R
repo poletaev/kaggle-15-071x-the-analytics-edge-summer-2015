@@ -1,10 +1,11 @@
-source('transform-data.R')
+#source('transform-data.R')
 
 ## build random forest model
 library(randomForest)
 ntree <- 4000
 nodesize <- 1
-ebayRandomForestModel <- randomForest(sold ~ . - description - UniqueID,
+
+ebayRandomForestModel <- randomForest(sold ~ . - UniqueID,
                                       ntree=ntree,
                                       nodesize=nodesize,
                                       data=newTrain)
@@ -35,11 +36,15 @@ print("cross-validation train data AUC: ")
 print(performance(predROCR, "auc")@y.values[[1]])
 
 ## store result of prediction
-ebayRandomForestModel <- randomForest(sold ~ . - description - UniqueID,
+ebayRandomForestModel <- randomForest(sold ~ . - UniqueID,
                                       ntree=ntree,
                                       nodesize=nodesize,
                                       data=train)
-test$Probability1 <- predict(ebayRandomForestModel, type="prob", newdata=test)[,2]
-write.table(format(test[, c("UniqueID", "Probability1")], digits=9),
+test1 <- test
+newTrain$RF <- predict(ebayRandomForestModel, type="prob", newdata=newTrain)[,2]
+cvTrain$RF <- predict(ebayRandomForestModel, type="prob", newdata=cvTrain)[,2]
+test$RF <- predict(ebayRandomForestModel, type="prob", newdata=test)[,2]
+test1$Probability1 <- test$RF
+write.table(format(test1[, c("UniqueID", "Probability1")], digits=9),
             file="../submissions/random-forest-model.csv",
             sep=",", row.names=FALSE, col.names = TRUE, quote = FALSE)

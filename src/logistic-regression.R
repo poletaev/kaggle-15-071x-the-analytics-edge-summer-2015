@@ -1,4 +1,4 @@
-source('transform-data.R')
+#source('transform-data.R')
 
 #newTrain <- newTrain[-c(1338, 146, 930, 1219, 1705, 1804, 1359),]
 
@@ -48,7 +48,11 @@ print("cross-validation train data AUC: ")
 print(performance(cvROCR, "auc")@y.values[[1]])
 
 ## store result of prediction
-test$Probability1 <- predict(logRegModel, type="response", newdata=test)
-write.table(format(test[, c("UniqueID", "Probability1")], digits=9),
+test1 <- test
+newTrain$LR <- predict(logRegModel, type="response", newdata=newTrain)
+cvTrain$LR <- predict(logRegModel, type="response", newdata=cvTrain)
+test$LR <- predict(logRegModel, type="response", newdata=test)
+test1$Probability1 <- test$LR
+write.table(format(test1[, c("UniqueID", "Probability1")], digits=9),
             file="../submissions/logistic-regression-model.csv",
             sep=",", row.names=FALSE, col.names = TRUE, quote = FALSE)

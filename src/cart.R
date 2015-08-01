@@ -1,4 +1,4 @@
-source('transform-data.R')
+#source('transform-data.R')
 
 # build classification and regression tree model
 library(rpart)
@@ -50,14 +50,18 @@ print(mean(performance(predROCR, "spec")@y.values[[1]]))
 print("train data AUC: ")
 print(performance(predROCR, "auc")@y.values[[1]])
 
+newTrain$CART <- predict(ebayTreeModel, type="prob", newdata = newTrain)[,2]
+cvTrain$CART <- predict(ebayTreeModel, type="prob", newdata = cvTrain)[,2]
 # AUC for cross-validated data
-cvROCR <- prediction(predict(ebayTreeModel, type="prob", newdata = cvTrain)[,2],
+cvROCR <- prediction(cvTrain$CART,
                      cvTrain$sold)
 print("cross-validation train data AUC: ")
 print(performance(cvROCR, "auc")@y.values[[1]])
 
 ## store result of prediction
-test$Probability1 <- predict(ebayTreeModel, type="prob", newdata=test)[,2]
-write.table(format(test[, c("UniqueID", "Probability1")], digits=9),
+test1 <- test
+test$CART <- predict(ebayTreeModel, type="prob", newdata=test)[,2]
+test1$Probability1 <- test$CART
+write.table(format(test1[, c("UniqueID", "Probability1")], digits=9),
             file="../submissions/cart-model.csv",
             sep=",", row.names=FALSE, col.names = TRUE, quote = FALSE)
