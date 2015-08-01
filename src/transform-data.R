@@ -42,9 +42,13 @@ data$startprice <- scale(data$startprice)
 # add new variable (empty description)
 data$emptydescription <- factor(data$description == "")
 
+data$Description <- NULL
+
 ## split data back into train and test
 train <- subset(data, data$train == 1)
 test <- subset(data, data$train == 0)
+train$train <- NULL
+test$train <- NULL
 test$sold <- NULL
 
 # split train data into those used for training and for cross-validation

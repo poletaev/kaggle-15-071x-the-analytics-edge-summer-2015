@@ -1,103 +1,15 @@
-library(caTools)
+source('transform-data.R')
 
-## load data
-trainData <- read.csv('../data/eBayiPadTrain.csv', stringsAsFactors=FALSE)
-testData <- read.csv('../data/eBayiPadTest.csv', stringsAsFactors=FALSE)
-
-## combine train and test data
-testData$train <- 0
-trainData$train <- 1
-testData$sold <- 0
-data <- rbind(trainData, testData)
-
-## modify independent variables
-# is an auction or a sale with a fixed price
-data$biddable <- as.factor(data$biddable)
-
-# condition of the product 
-condition <- as.factor(data$condition)
-condition <- factor(condition,
-                    levels=c("New",
-                             "New other (see details)",
-                             "Manufacturer refurbished",
-                             "Seller refurbished",
-                             "Used",
-                             "For parts or not working"),
-                    ordered=FALSE)
-data$condition <- condition
-rm(condition)
-
-# whether the iPad has cellular connectivity
-data$cellular <- as.factor(data$cellular)
-
-# the cellular carrier for which the iPad is equipped
-data$carrier <- as.factor(data$carrier)
-
-# the color of the iPad
-data$color <- as.factor(data$color)
-
-# the iPad's storage capacity (in gigabytes)
-data$storage <- as.factor(data$storage)
-
-# dependent variable
-data$sold <- as.factor(data$sold)
-
-# order product line according to date of release
-# it might be not accurate
-# sorce of dates is https://en.wikipedia.org/wiki/IPad#iPad_series
-prodline <- as.factor(data$productline)
-prodline <- factor(prodline,
-                   levels=c("Unknown",
-                            "iPad 1",           # April 30, 2010
-                            "iPad 2",           # March 25, 2011
-                            "iPad 3",           # March 23, 2012
-                            "iPad mini",        # November 2, 2012
-                            "iPad 4",           # ?? 
-                            "iPad mini 2",      # November 12, 2013
-                            "iPad Air",         # November 1, 2013
-                            "iPad 5",           # ?? October 24, 2014
-                            "iPad mini Retina", # ??
-                            "iPad mini 3",      # October 24, 2014
-                            "iPad Air 2"),      # October 24, 2014
-                   ordered=FALSE)
-data$productline <- prodline
-rm(prodline)
-
-## scale startprice
-data$startprice <- scale(data$startprice)
-
-# add new variable (empty description)
-data$emptydescription <- factor(data$description == "")
-
-## split data back into train and test
-train <- subset(data, data$train == 1)
-#train <- train[-c(718, 1057, 1088, 1148, 1797),]
-train <- train[-c(1057),]
-test <- subset(data, data$train == 0)
-test$sold <- NULL
-
-# split train data into those used for training and for cross-validation
-set.seed(144)
-spl <- sample.split(trainData, 0.8)
-newTrain <- subset(train, spl == TRUE)
-cvTrain <- subset(train, spl == FALSE)
+#newTrain <- newTrain[-c(1338, 146, 930, 1219, 1705, 1804, 1359),]
 
 # build logistic regression model
-logRegModel.full <- glm(sold ~ biddable + startprice + condition +cellular +
-                          + carrier + color + storage + productline,
-                        family=binomial(),
-                        data=newTrain)
-
-logRegModel.1 <- glm(sold ~ biddable + startprice + condition + storage + 
-                     productline + emptydescription,
-                   family=binomial(),
-                   data=newTrain)
-
-library(robust)
-logRegModel <- glm(sold ~ biddable + startprice + condition + cellular +
-                   storage + productline,
-                   family=binomial(),
-                   data=newTrain)
+logRegModel <- glm(formula = sold ~ biddable + startprice + condition_for_parts_or_not_working + 
+                     condition_seller_refurbished + cellular_0 + cellular_1 + 
+                     carrier_none + carrier_sprint + storage_16 + storage_32 + 
+                     productline_unknown + productline_ipad_1 + productline_ipad_2 + 
+                     productline_ipad_3 + productline_ipad_4 + productline_ipad_air + 
+                     productline_ipad_mini + productline_ipad_mini_2 + productline_ipad_mini_3 + 
+                     emptydescription - UniqueID, family = binomial(), data = newTrain)
 
 plot(logRegModel)
 
@@ -122,10 +34,11 @@ library(ROCR)
 predROCR <- prediction(predict(logRegModel, type="response", newdata=train),
                       train$sold)
 perfROCR <- performance(predROCR, "tpr", "fpr")
-plot(perfROCR, colorize=TRUE)
+plot(perfROCR, colorize=TRUE, print.cutoffs.at=seq(0,1,0.1),
+     text.adj=c(-0.2, 1.7))
 
 # Compute AUC
-print("test data AUC: ")
+print("train data AUC: ")
 print(performance(predROCR, "auc")@y.values)
 
 # AUC for cross-validated data
@@ -137,5 +50,5 @@ print(performance(cvROCR, "auc")@y.values)
 ## store result of prediction
 test$Probability1 <- predict(logRegModel, type="response", newdata=test)
 write.table(format(test[, c("UniqueID", "Probability1")], digits=9),
-            file="../submissions/logistic-regression-model-2.csv",
+            file="../submissions/logistic-regression-model.csv",
             sep=",", row.names=FALSE, col.names = TRUE, quote = FALSE)
