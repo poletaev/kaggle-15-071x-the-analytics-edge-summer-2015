@@ -1,12 +1,13 @@
 source('transform-data.R')
 
+## build random forest model
 library(randomForest)
-# build random forest model
+ntree <- 4000
+nodesize <- 1
 ebayRandomForestModel <- randomForest(sold ~ . - description - UniqueID,
-                                      ntree=5000,
-                                      nodesize=1,
+                                      ntree=ntree,
+                                      nodesize=nodesize,
                                       data=newTrain)
-
 plot(ebayRandomForestModel)
 
 # plot ROC
@@ -15,7 +16,7 @@ predROCR <- prediction(predict(ebayRandomForestModel, type="prob", newdata=cvTra
                        cvTrain$sold)
 perfROCR <- performance(predROCR, "tpr", "fpr")
 plot(perfROCR, colorize=TRUE, print.cutoffs.at=seq(0,1,0.1),
-     text.adj=c(-0.2, 1.7))
+     text.adj=c(-0.2, 1.7), main="ROC curve for random-forest model on CV set")
 
 # Compute Accuracy
 print("cross-validation train data Accuracy: ")
@@ -34,6 +35,10 @@ print("cross-validation train data AUC: ")
 print(performance(predROCR, "auc")@y.values[[1]])
 
 ## store result of prediction
+ebayRandomForestModel <- randomForest(sold ~ . - description - UniqueID,
+                                      ntree=ntree,
+                                      nodesize=nodesize,
+                                      data=train)
 test$Probability1 <- predict(ebayRandomForestModel, type="prob", newdata=test)[,2]
 write.table(format(test[, c("UniqueID", "Probability1")], digits=9),
             file="../submissions/random-forest-model.csv",
