@@ -36,10 +36,6 @@ print("cross-validation train data AUC: ")
 print(performance(predROCR, "auc")@y.values[[1]])
 
 ## store result of prediction
-ebayRandomForestModel <- randomForest(sold ~ . - UniqueID,
-                                      ntree=ntree,
-                                      nodesize=nodesize,
-                                      data=train)
 test1 <- test
 newTrain$RF <- predict(ebayRandomForestModel, type="prob", newdata=newTrain)[,2]
 cvTrain$RF <- predict(ebayRandomForestModel, type="prob", newdata=cvTrain)[,2]
