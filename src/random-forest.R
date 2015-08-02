@@ -1,9 +1,9 @@
-#source('transform-data.R')
+source('transform-data.R')
 
 ## build random forest model
 library(randomForest)
-ntree <- 4000
-nodesize <- 1
+ntree <- 2000
+nodesize <- 2
 
 ebayRandomForestModel <- randomForest(sold ~ . - UniqueID,
                                       ntree=ntree,
