@@ -19,7 +19,7 @@ predROCR <- prediction(predict(metaLogRegModel, type="response", newdata=cvTrain
                        cvTrain$sold)
 perfROCR <- performance(predROCR, "tpr", "fpr")
 plot(perfROCR, colorize=TRUE, print.cutoffs.at=seq(0,1,0.1),
-     text.adj=c(-0.2, 1.7))
+     text.adj=c(-0.2, 1.7), main="ROC for meta model on CV set")
 
 # Compute Accuracy
 print("cross-validation train data Accuracy: ")

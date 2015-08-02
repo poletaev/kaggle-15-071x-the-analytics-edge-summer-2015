@@ -1,4 +1,4 @@
-source('transform-data.R')
+#source('transform-data.R')
 
 # build classification and regression tree model
 library(rpart)

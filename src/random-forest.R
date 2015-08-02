@@ -1,4 +1,4 @@
-source('transform-data.R')
+#source('transform-data.R')
 
 ## build random forest model
 library(randomForest)
