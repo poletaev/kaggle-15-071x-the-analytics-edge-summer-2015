@@ -1,4 +1,4 @@
-#source('transform-data.R')
+source('transform-data.R')
 
 # build classification and regression tree model
 library(rpart)
@@ -32,7 +32,7 @@ predROCR <- prediction(predict(ebayTreeModel, type="prob", newdata=train)[,2],
                       train$sold)
 perfROCR <- performance(predROCR, "tpr", "fpr")
 plot(perfROCR, colorize=TRUE, print.cutoffs.at=seq(0,1,0.1),
-     text.adj=c(-0.2, 1.7))
+     text.adj=c(-0.2, 1.7), main="train data ROC")
 
 # Compute Accuracy
 print("train data Accuracy: ")
@@ -57,6 +57,10 @@ cvROCR <- prediction(cvTrain$CART,
                      cvTrain$sold)
 print("cross-validation train data AUC: ")
 print(performance(cvROCR, "auc")@y.values[[1]])
+
+perfROCR <- performance(cvROCR, "tpr", "fpr")
+plot(perfROCR, colorize=TRUE, print.cutoffs.at=seq(0,1,0.1),
+     text.adj=c(-0.2, 1.7), main="cross-validation train data ROC")
 
 ## store result of prediction
 test1 <- test
