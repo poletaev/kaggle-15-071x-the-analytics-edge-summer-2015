@@ -81,7 +81,7 @@ test$train <- NULL
 
 # split train data into those used for training and for cross-validation
 set.seed(144)
-spl <- sample.split(trainData, 0.8)
+spl <- sample.split(trainData$sold, 0.8)
 newTrain <- subset(train, spl == TRUE)
 cvTrain <- subset(train, spl == FALSE)
 
