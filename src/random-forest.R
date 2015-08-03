@@ -1,12 +1,17 @@
-#source('transform-data.R')
+source('transform-data.R')
 
 ## build random forest model
 library(randomForest)
-ntree <- 2000
+ntree <- 4000
 nodesize <- 2
+
+tuneRF(newTrain[,-c(9, 10)], newTrain[,9],ntreeTry=ntree, stepFactor=1.5,
+       improve=0.05, trace=TRUE, plot=TRUE, doBest=FALSE,
+       nodesize=nodesize)
 
 ebayRandomForestModel <- randomForest(sold ~ . - UniqueID,
                                       ntree=ntree,
+                                      mtry = 4,
                                       nodesize=nodesize,
                                       data=newTrain)
 plot(ebayRandomForestModel)
@@ -34,6 +39,12 @@ print(mean(performance(predROCR, "spec")@y.values[[1]]))
 # Compute AUC
 print("cross-validation train data AUC: ")
 print(performance(predROCR, "auc")@y.values[[1]])
+
+predROCR <- prediction(predict(ebayRandomForestModel, type="prob", newdata=newTrain)[,2],
+                       newTrain$sold)
+print("train data AUC: ")
+print(performance(predROCR, "auc")@y.values[[1]])
+
 
 ## store result of prediction
 test1 <- test
