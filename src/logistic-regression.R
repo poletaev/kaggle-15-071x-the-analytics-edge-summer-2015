@@ -1,6 +1,6 @@
 #source('transform-data.R')
 
-#newTrain <- newTrain[-c(1338, 146, 930, 1219, 1705, 1804, 1359),]
+newTrain <- newTrain[-c(1338, 146, 930, 1219, 1705, 1804, 1359),]
 
 # build logistic regression model
 logRegModel <- glm(formula = sold ~ biddable + startprice + cellular + storage + productline + 
@@ -27,7 +27,7 @@ predROCR <- prediction(predict(logRegModel, type="response", newdata=cvTrain),
                        cvTrain$sold)
 perfROCR <- performance(predROCR, "tpr", "fpr")
 plot(perfROCR, colorize=TRUE, print.cutoffs.at=seq(0,1,0.1),
-     text.adj=c(-0.2, 1.7), main="cross-validation train data ROC")
+     text.adj=c(-0.2, 1.7), main="ROC curve for Logistic Regression model on CV set")
 
 # Compute Accuracy
 print("cross-validation train data Accuracy: ")

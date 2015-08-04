@@ -1,4 +1,4 @@
-#source('transform-data.R')
+source('transform-data.R')
 
 # build classification and regression tree model
 library(rpart)
@@ -21,7 +21,6 @@ library(e1071)
 
 ebayTreeModel <- rpart(sold ~ . - UniqueID,
                        method="class",
-                       #cp = 0.0057001,
                        cp=0.00005,
                        data=newTrain)
 prp(ebayTreeModel)
@@ -60,7 +59,7 @@ print(performance(cvROCR, "auc")@y.values[[1]])
 
 perfROCR <- performance(cvROCR, "tpr", "fpr")
 plot(perfROCR, colorize=TRUE, print.cutoffs.at=seq(0,1,0.1),
-     text.adj=c(-0.2, 1.7), main="cross-validation train data ROC")
+     text.adj=c(-0.2, 1.7), main="ROC curve for CART model on CV set")
 
 ## store result of prediction
 test1 <- test

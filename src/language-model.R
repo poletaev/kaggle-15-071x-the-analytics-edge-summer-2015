@@ -158,4 +158,5 @@ print(performance(cvROCR, "auc")@y.values[[1]])
 
 perfROCR <- performance(cvROCR, "tpr", "fpr")
 plot(perfROCR, colorize=TRUE, print.cutoffs.at=seq(0,1,0.1),
-     text.adj=c(-0.2, 1.7), main="cross-validation train data ROC for CART")
+     text.adj=c(-0.2, 1.7),
+     main="ROC curve for CART model on CV set of descriptions")
